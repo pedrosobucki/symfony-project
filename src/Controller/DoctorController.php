@@ -44,13 +44,30 @@ class DoctorController extends AbstractController{
   /**
    * @Route("/doctors", methods="GET")
    */
-  public function getAall() : Response {
+  public function getAll() : Response {
 
     $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
 
     $doctors = $doctorRespository->findAll();
 
     return new JsonResponse($doctors);
+  }
+
+  /**
+   * @Route("/doctors/{id}", methods="GET")
+   */
+  public function getById(Request $request) : Response {
+
+    $id = $request->get('id');
+
+    $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
+    $doctors = $doctorRespository->find($id);
+
+    $httpCode = 200;
+    if(is_null($doctors))
+      $httpCode = Response::HTTP_NO_CONTENT;
+
+    return new JsonResponse($doctors, $httpCode);
   }
 }
 ?>
