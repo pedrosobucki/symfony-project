@@ -95,6 +95,22 @@ class DoctorController extends AbstractController{
     return new JsonResponse($fetchedDoctor);
   }
 
+  /**
+   * @Route("/doctors/{id}", methods="DELETE")
+   */
+  public function delete(int $id, Request $request) : Response {
+
+    $doctor = $this->searchDoctorById($id);
+
+    if(is_null($doctor))
+      return new JsonResponse('', Response::HTTP_NOT_FOUND);
+
+    $this->entityManager->remove($doctor);
+    $this->entityManager->flush();
+
+    return new JsonResponse('', Response::HTTP_NO_CONTENT);
+  }
+
   private function searchDoctorById(int $id){
     $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
     return $doctorRespository->find($id);
