@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Doctor;
+use App\Helper\DoctorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,27 +14,33 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class DoctorController extends AbstractController{
 
-  private $entityManager;
-  private $doctrine;
+  private EntityManagerInterface $entityManager;
+  private ManagerRegistry $doctrine;
+  private DoctorFactory $doctorFactory;
 
-  public function __construct(EntityManagerInterface $entityManager, ManagerRegistry $doctrine) {
+  public function __construct(
+    EntityManagerInterface $entityManager,
+    ManagerRegistry $doctrine,
+    DoctorFactory $doctorFactory
+  ) {
     $this->entityManager = $entityManager;
     $this->doctrine = $doctrine;
+    $this->doctorFactory = $doctorFactory;
   }
 
   private function getDoctrine() : ManagerRegistry {
     return $this->doctrine;
   }
 
+  private function doctorFactory() : DoctorFactory {
+    return $this->doctorFactory;
+  }
+
   /**
    * @Route("/doctors", methods="POST")
    */
   public function create(Request $request) : Response {
-    $content = json_decode($request->getContent());
-    $doctor = new Doctor();
-
-    $doctor->setCrm($content->crm);
-    $doctor->setName($content->name);
+    $doctor = $this->doctorFactory()->createDoctor($request->getContent());
 
     $this->entityManager->persist($doctor);
     $this->entityManager->flush();
@@ -58,14 +65,13 @@ class DoctorController extends AbstractController{
    */
   public function getById(int $id) : Response {
 
-    $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
-    $doctors = $doctorRespository->find($id);
+    $doctor = $this->searchDoctorById($id);
 
     $httpCode = 200;
-    if(is_null($doctors))
+    if(is_null($doctor))
       $httpCode = Response::HTTP_NO_CONTENT;
 
-    return new JsonResponse($doctors, $httpCode);
+    return new JsonResponse($doctor, $httpCode);
   }
 
   /**
@@ -74,13 +80,9 @@ class DoctorController extends AbstractController{
   public function update(int $id, Request $request) : Response {
 
     $content = json_decode($request->getContent());
-    $newDoctor = new Doctor();
+    $newDoctor = $this->doctorFactory()->createDoctor($request->getContent());
 
-    $newDoctor->setCrm($content->crm);
-    $newDoctor->setName($content->name);
-
-    $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
-    $fetchedDoctor = $doctorRespository->find($id);
+    $fetchedDoctor = $this->searchDoctorById($id);
 
     if(is_null($fetchedDoctor))
       return new JsonResponse('', Response::HTTP_NOT_FOUND);
@@ -91,6 +93,11 @@ class DoctorController extends AbstractController{
     $this->entityManager->flush();
 
     return new JsonResponse($fetchedDoctor);
+  }
+
+  private function searchDoctorById(int $id){
+    $doctorRespository = $this->getDoctrine()->getRepository(Doctor::class);
+    return $doctorRespository->find($id);
   }
 }
 ?>
