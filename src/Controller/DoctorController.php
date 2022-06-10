@@ -89,6 +89,7 @@ class DoctorController extends AbstractController{
 
     $fetchedDoctor->setCrm($newDoctor->getCrm());
     $fetchedDoctor->setName($newDoctor->getName());
+    $fetchedDoctor->setExpertise($newDoctor->getExpertise());
 
     $this->entityManager->flush();
 

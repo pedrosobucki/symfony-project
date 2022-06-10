@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Expertise;
+use App\Repository\ExpertiseRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,12 +14,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ExpertiseController extends AbstractController{
 
     private EntityManagerInterface $entityManager;
+    private ExpertiseRepository $repository;
 
-    public function __construct(EntityManagerInterface $entityManager){
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        ExpertiseRepository $repository
+    ){
         $this->entityManager = $entityManager;
+        $this->repository = $repository;
     }
     /** 
-     *@Route("/expertise", methods="POST")
+     *@Route("/expertises", methods="POST")
      */
     public function create(Request $request) : Response {
         $content = json_decode($request->getContent());

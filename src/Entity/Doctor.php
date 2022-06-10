@@ -7,24 +7,24 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity()
  */
-class Doctor {
+class Doctor implements \JsonSerializable {
 
   /**
    * @ORM\Id
    * @ORM\GeneratedValue
    * @ORM\Column(type="integer")
    */
-  public int $id;
+  private int $id;
 
   /**
    * @ORM\Column(type="integer")
    */
-  public int $crm;
+  private int $crm;
   
   /**
    * @ORM\Column(type="string")
    */
-  public string $name;
+  private string $name;
 
   /**
    * @ORM\ManyToOne(targetEntity=Expertise::class)
@@ -66,6 +66,15 @@ class Doctor {
       $this->expertise = $expertise;
 
       return $this;
+  }
+
+  public function jsonSerialize() : array {
+    return [
+      'id' => $this->getId(),
+      'crm' => $this->getCrm(),
+      'name' => $this->getName(),
+      'expertiseId' => $this->getExpertise()->getId()
+    ];
   }
 
 }
