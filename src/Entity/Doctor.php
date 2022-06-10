@@ -26,6 +26,12 @@ class Doctor {
    */
   public string $name;
 
+  /**
+   * @ORM\ManyToOne(targetEntity=Expertise::class)
+   * @ORM\JoinColumn(nullable=false)
+   */
+  private $expertise;
+
   public function getId() : int {
     return $this->id;
   }
@@ -48,6 +54,18 @@ class Doctor {
 
   public function setName(string $name) : void {
     $this->name = $name;
+  }
+
+  public function getExpertise(): ?Expertise
+  {
+      return $this->expertise;
+  }
+
+  public function setExpertise(?Expertise $expertise): self
+  {
+      $this->expertise = $expertise;
+
+      return $this;
   }
 
 }
